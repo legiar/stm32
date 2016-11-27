@@ -37,8 +37,6 @@
 
 /* USER CODE BEGIN Includes */
 #include "stm32f1xx_hal.h"
-#include "ministm32_v3.h"
-#include "ministm32_v3_lcd.h"
 
 /* USER CODE END Includes */
 

@@ -39,6 +39,10 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
+#include "ministm32_v3.h"
+#include "ministm32_v3_lcd.h"
+#include "logo.h"
+
 #include "hardware.h"
 #include "ili932x.h"
 /* USER CODE END Includes */
@@ -60,14 +64,11 @@ void Error_Handler(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -86,9 +87,18 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   LCD_Init();
-  LCD_Clear(BLUE);
-  LCD_WriteBMP(68, 64, 97, 99, gImage_11);
-  WriteString(10, 220, "ILI932X TFT LCD\r\n\r    STM32F103RB", RED);	
+  
+  LCD_Clear(LCD_COLOR_BLUE);
+  LCD_DrawRGBImage((LCD_GetXSize() - 99) / 2, 100, 99, 97, (uint8_t*)logoOpenMCU);
+  
+  LCD_SetTextColor(LCD_COLOR_RED);
+  LCD_DrawHLine(20, 20, 200);
+  LCD_DrawLine(220, 20, 210, 15);
+  LCD_DrawLine(220, 20, 210, 25);
+  LCD_SetTextColor(LCD_COLOR_YELLOW);
+  LCD_DrawVLine(20, 20, 280);
+  LCD_DrawLine(20, 300, 15, 290);
+  LCD_DrawLine(20, 300, 25, 290);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -97,12 +107,11 @@ int main(void)
   {
   /* USER CODE END WHILE */
 
-	/* USER CODE BEGIN 3 */
-		HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-		HAL_Delay(500);
+  /* USER CODE BEGIN 3 */
+    HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+    HAL_Delay(500);
   }
   /* USER CODE END 3 */
-
 }
 
 /** System Clock Configuration
