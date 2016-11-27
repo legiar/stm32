@@ -39,14 +39,15 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "hardware.h"
+#include "ili932x.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+extern uint8_t gImage_11[];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -84,7 +85,10 @@ int main(void)
   MX_USART1_UART_Init();
 
   /* USER CODE BEGIN 2 */
-
+  LCD_Init();
+  LCD_Clear(BLUE);
+  LCD_WriteBMP(68, 64, 97, 99, gImage_11);
+  WriteString(10, 220, "ILI932X TFT LCD\r\n\r    STM32F103RB", RED);	
   /* USER CODE END 2 */
 
   /* Infinite loop */

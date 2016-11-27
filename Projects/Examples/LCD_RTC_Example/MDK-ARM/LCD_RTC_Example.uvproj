@@ -362,7 +362,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../../../../Drivers/STM32F1xx_HAL_Driver/Inc;../../../../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../../../../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../../../../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Inc;../../../../Drivers/MiniSTM32-V3;../../../../Drivers/STM32F1xx_HAL_Driver/Inc;../../../../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../../../../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../../../../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -549,6 +549,26 @@
               <FileName>stm32f1xx_hal_gpio_ex.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Drivers/MiniSTM32-V3</GroupName>
+          <Files>
+            <File>
+              <FileName>bmp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\Drivers\MiniSTM32-V3\bmp.c</FilePath>
+            </File>
+            <File>
+              <FileName>hz16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\Drivers\MiniSTM32-V3\hz16.c</FilePath>
+            </File>
+            <File>
+              <FileName>ILI932x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\Drivers\MiniSTM32-V3\ILI932x.c</FilePath>
             </File>
           </Files>
         </Group>
