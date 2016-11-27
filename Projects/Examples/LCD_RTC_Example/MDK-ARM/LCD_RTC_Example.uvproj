@@ -362,7 +362,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../../../../Drivers/MiniSTM32-V3;../../../../Drivers/STM32F1xx_HAL_Driver/Inc;../../../../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../../../../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../../../../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Inc;../../../../Drivers/MiniSTM32-V3;../../../../Drivers/Components/ili932x;../../../../Drivers/Components/common;../../../../Drivers/STM32F1xx_HAL_Driver/Inc;../../../../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../../../../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../../../../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -566,9 +566,24 @@
               <FilePath>..\..\..\..\Drivers\MiniSTM32-V3\hz16.c</FilePath>
             </File>
             <File>
-              <FileName>ILI932x.c</FileName>
+              <FileName>ministm32_v3.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\Drivers\MiniSTM32-V3\ILI932x.c</FilePath>
+              <FilePath>..\..\..\..\Drivers\MiniSTM32-V3\ministm32_v3.c</FilePath>
+            </File>
+            <File>
+              <FileName>ministm32_v3_lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\Drivers\MiniSTM32-V3\ministm32_v3_lcd.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Drivers/Components/ili932x</GroupName>
+          <Files>
+            <File>
+              <FileName>ili932x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\Drivers\Components\ili932x\ili932x.c</FilePath>
             </File>
           </Files>
         </Group>
