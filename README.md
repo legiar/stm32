@@ -1,2 +1,2 @@
-# stm32 using HAL
+# STM32 using HAL
 
