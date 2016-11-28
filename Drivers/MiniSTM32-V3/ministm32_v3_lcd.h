@@ -1,7 +1,7 @@
 #ifndef __MINISTM32_V3_LCD_H
 #define __MINISTM32_V3_LCD_H
 
-#include <stdint.h>
+#include "stdio.h"
 #include "ministm32_v3.h"
 #include "../Components/ili932x/ili932x.h"
 #include "../../../Utilities/Fonts/fonts.h"
@@ -13,6 +13,19 @@ typedef struct
   sFONT    *pFont; 
 
 } LCD_DrawPropTypeDef;
+
+typedef enum
+{
+  CENTER_MODE             = 0x01,    // Center mode
+  RIGHT_MODE              = 0x02,    // Right mode
+  LEFT_MODE               = 0x03     // Left mode
+} Line_ModeTypdef;
+
+typedef struct 
+{
+  int16_t X;
+  int16_t Y;
+} Point, *pPoint; 
 
 #define LCD_OK         0x00
 #define LCD_ERROR      0x01
@@ -61,23 +74,23 @@ void     LCD_SetFont(sFONT *fonts);
 sFONT    *LCD_GetFont(void);
 
 void     LCD_Clear(uint16_t Color);
-//void     LCD_ClearStringLine(uint16_t Line);
-//void     LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr);
-//void     LCD_DisplayStringAt(uint16_t Xpos, uint16_t Ypos, uint8_t *Text, Line_ModeTypdef Mode);
-//void     LCD_DisplayChar(uint16_t Xpos, uint16_t Ypos, uint8_t Ascii);
+void     LCD_ClearStringLine(uint16_t Line);
+void     LCD_DisplayChar(uint16_t Xpos, uint16_t Ypos, uint8_t Char);
+void     LCD_DisplayStringAt(uint16_t Xpos, uint16_t Ypos, uint8_t *pText, Line_ModeTypdef Mode);
+void     LCD_DisplayStringAtLine(uint16_t Line, uint8_t *pText);
 
 //uint16_t LCD_ReadPixel(uint16_t Xpos, uint16_t Ypos);
 void     LCD_DrawHLine(uint16_t Xpos, uint16_t Ypos, uint16_t Length);
 void     LCD_DrawVLine(uint16_t Xpos, uint16_t Ypos, uint16_t Length);
 void     LCD_DrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
-//void     LCD_DrawRect(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height);
-//void     LCD_DrawCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius);
-//void     LCD_DrawPolygon(pPoint Points, uint16_t PointCount);
-//void     LCD_DrawEllipse(int Xpos, int Ypos, int XRadius, int YRadius);
+void     LCD_DrawRect(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height);
+void     LCD_DrawCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius);
+void     LCD_DrawPolygon(pPoint Points, uint16_t PointCount);
+void     LCD_DrawEllipse(int Xpos, int Ypos, int XRadius, int YRadius);
+void     LCD_FillRect(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height);
+void     LCD_FillCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius);
+void     LCD_FillEllipse(int Xpos, int Ypos, int XRadius, int YRadius);
 void     LCD_DrawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp);
 void     LCD_DrawRGBImage(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height, uint8_t *Bitmap);
-//void     LCD_FillRect(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height);
-//void     LCD_FillCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius);
-//void     LCD_FillEllipse(int Xpos, int Ypos, int XRadius, int YRadius);
 
 #endif

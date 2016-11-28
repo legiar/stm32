@@ -49,12 +49,21 @@ void ili9325_Init(void)
     // AM=1 (address is updated in vertical writing direction)
     //ili9325_WriteReg(LCD_REG_3, 0x1010);
 
-    // set GRAM write direction and BGR = 1
-    // I/D=00 (Horizontal : increment, Vertical : decrement)
-    // AM=1 (address is updated in vertical writing direction)
-    //ili9325_WriteReg(LCD_REG_3, 0x1018);  
+    ili9325_WriteReg(LCD_REG_3, 0x1018); // set GRAM write direction and BGR = 1
+                                         // I/D=00 (Horizontal : increment, Vertical : decrement)
+                                         // AM=1 (address is updated in vertical writing direction)
 
-    ili9325_WriteReg(LCD_REG_3,  0x1030); // set GRAM write direction and BGR = 1
+    #if (LCD_ORIENTATION == 0)
+      //LCD_WriteReg(0x0003,(1<<12)|(1<<5)|(1<<4)|(0<<3));
+    #elif (LCD_ORIENTATION == 90)
+      //LCD_WriteReg(0x0003,(1<<12)|(0<<5)|(1<<4)|(1<<3));		
+    #elif (LCD_ORIENTATION == 180)
+      //LCD_WriteReg(0x0003,(1<<12)|(0<<5)|(0<<4)|(0<<3));
+    #elif (LCD_ORIENTATION == 270)
+      //LCD_WriteReg(0x0003,(1<<12)|(1<<5)|(0<<4)|(1<<3));
+    #endif
+    
+    //ili9325_WriteReg(LCD_REG_3,  0x1030); // set GRAM write direction and BGR = 1
                                           // I/D=11 (Horizontal : increment, Vertical : increment)
                                           // AM=0 (address is updated in horizontal writing direction)
     
@@ -206,12 +215,28 @@ void ili9325_DisplayOff(void)
 
 uint16_t ili9325_GetLcdPixelWidth(void)
 {
- return (uint16_t)240;
+  #if (LCD_ORIENTATION == 0)
+    return (uint16_t)240;
+  #elif (LCD_ORIENTATION == 90)
+    return (uint16_t)320;
+  #elif (LCD_ORIENTATION == 180)
+    return (uint16_t)240;
+  #elif (LCD_ORIENTATION == 270)
+    return (uint16_t)320;
+  #endif
 }
 
 uint16_t ili9325_GetLcdPixelHeight(void)
 {
- return (uint16_t)320;
+  #if (LCD_ORIENTATION == 0)
+    return (uint16_t)320;
+  #elif (LCD_ORIENTATION == 90)
+    return (uint16_t)240;
+  #elif (LCD_ORIENTATION == 180)
+    return (uint16_t)320;
+  #elif (LCD_ORIENTATION == 270)
+    return (uint16_t)240;
+  #endif
 }
 
 uint16_t ili9325_ReadID(void)
@@ -222,10 +247,15 @@ uint16_t ili9325_ReadID(void)
 
 void ili9325_SetCursor(uint16_t Xpos, uint16_t Ypos)
 {
-  //ili9325_WriteReg(LCD_REG_32, Ypos);
-  //ili9325_WriteReg(LCD_REG_33, (ILI9325_LCD_PIXEL_WIDTH - 1 - Xpos));
-  ili9325_WriteReg(LCD_REG_32, Xpos);
-  ili9325_WriteReg(LCD_REG_33, Ypos);
+  #if (LCD_ORIENTATION == 0)
+    ili9325_WriteReg(LCD_REG_32, Xpos);
+    ili9325_WriteReg(LCD_REG_33, Ypos);
+  #elif (LCD_ORIENTATION == 90)
+    ili9325_WriteReg(LCD_REG_32, Ypos);
+    ili9325_WriteReg(LCD_REG_33, (ILI9325_LCD_PIXEL_WIDTH - 1 - Xpos));
+  #elif (LCD_ORIENTATION == 180)
+  #elif (LCD_ORIENTATION == 270)
+  #endif
 }
 
 void ili9325_WritePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode)
@@ -252,22 +282,26 @@ uint16_t ili9325_ReadPixel(uint16_t Xpos, uint16_t Ypos)
 
 void ili9325_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height)
 {
-  // Horizontal GRAM Start Address
-  //ili9325_WriteReg(LCD_REG_80, (Ypos));
-  // Horizontal GRAM End Address
-  //ili9325_WriteReg(LCD_REG_81, (Ypos + Height - 1));
-  
-  // Vertical GRAM Start Address
-  //ili9325_WriteReg(LCD_REG_82, ILI9325_LCD_PIXEL_WIDTH - Xpos - Width);
-  // Vertical GRAM End Address
-  //ili9325_WriteReg(LCD_REG_83, ILI9325_LCD_PIXEL_WIDTH - Xpos - 1);  
-  
-  ili9325_WriteReg(LCD_REG_80, Xpos);
-  ili9325_WriteReg(LCD_REG_81, Xpos + Width);
-  ili9325_WriteReg(LCD_REG_82, Ypos);
-  ili9325_WriteReg(LCD_REG_83, Ypos + Height);
+  #if (LCD_ORIENTATION == 0)
+    ili9325_WriteReg(LCD_REG_80, Xpos);
+    ili9325_WriteReg(LCD_REG_81, Xpos + Width);
+    ili9325_WriteReg(LCD_REG_82, Ypos);
+    ili9325_WriteReg(LCD_REG_83, Ypos + Height);
 
-  ili9325_SetCursor(Xpos, Ypos);
+    ili9325_SetCursor(Xpos, Ypos);
+  #elif (LCD_ORIENTATION == 90)
+    // Horizontal GRAM Start Address
+    ili9325_WriteReg(LCD_REG_80, (Ypos));
+    // Horizontal GRAM End Address
+    ili9325_WriteReg(LCD_REG_81, (Ypos + Height - 1));
+    
+    // Vertical GRAM Start Address
+    ili9325_WriteReg(LCD_REG_82, ILI9325_LCD_PIXEL_WIDTH - Xpos - Width);
+    // Vertical GRAM End Address
+    ili9325_WriteReg(LCD_REG_83, ILI9325_LCD_PIXEL_WIDTH - Xpos - 1);  
+  #elif (LCD_ORIENTATION == 180)
+  #elif (LCD_ORIENTATION == 270)
+  #endif
 }
 
 void ili9325_DrawHLine(uint16_t Color, uint16_t Xpos, uint16_t Ypos, uint16_t Length)
@@ -293,25 +327,36 @@ void ili9325_DrawVLine(uint16_t Color, uint16_t Xpos, uint16_t Ypos, uint16_t Le
     ArrayRGB[i] = Color;
   }
 
-  ili9325_WriteReg(LCD_REG_3,  0x1038); // set GRAM write direction and BGR = 1
-                                        // I/D=11 (Horizontal : increment, Vertical : increment)
-                                        // AM=1 (address is updated in vertical writing direction)
-  //ili9325_WriteReg(LCD_REG_3, 0x1010);  // set GRAM write direction and BGR = 1
-                                        // I/D=00 (Horizontal : increment, Vertical : decrement)
-                                        // AM=1 (address is updated in vertical writing direction)
+  #if (LCD_ORIENTATION == 0)
+    ili9325_WriteReg(LCD_REG_3,  0x1038); // set GRAM write direction and BGR = 1
+                                          // I/D=11 (Horizontal : increment, Vertical : increment)
+                                          // AM=1 (address is updated in vertical writing direction)
+  #elif (LCD_ORIENTATION == 90)
+    ili9325_WriteReg(LCD_REG_3,  0x1010); // set GRAM write direction and BGR = 1
+                                          // I/D=00 (Horizontal : increment, Vertical : decrement)
+                                          // AM=1 (address is updated in vertical writing direction)
+  #elif (LCD_ORIENTATION == 180)
+  #elif (LCD_ORIENTATION == 270)
+  #endif
+  
   // Set Cursor
   ili9325_SetCursor(Xpos, Ypos);
   // Prepare to write GRAM
   LCD_IO_WriteReg(LCD_REG_34);
   // Write 16-bit GRAM Reg
   LCD_IO_WriteDataBuffer(ArrayRGB, Length);
- 
-  ili9325_WriteReg(LCD_REG_3,  0x1030); // set GRAM write direction and BGR = 1
-                                        // I/D=11 (Horizontal : increment, Vertical : increment)
-                                        // AM=0 (address is updated in horizontal writing direction)
-  //ili9325_WriteReg(LCD_REG_3, 0x1018);  // set GRAM write direction and BGR = 1
-                                        // I/D=00 (Horizontal : increment, Vertical : decrement)
-                                        // AM=1 (address is updated in vertical writing direction)
+
+  #if (LCD_ORIENTATION == 0)
+    ili9325_WriteReg(LCD_REG_3,  0x1030); // set GRAM write direction and BGR = 1
+                                          // I/D=11 (Horizontal : increment, Vertical : increment)
+                                          // AM=0 (address is updated in horizontal writing direction)
+  #elif (LCD_ORIENTATION == 90)
+    ili9325_WriteReg(LCD_REG_3,  0x1018); // set GRAM write direction and BGR = 1
+                                          // I/D=00 (Horizontal : increment, Vertical : decrement)
+                                          // AM=1 (address is updated in vertical writing direction)
+  #elif (LCD_ORIENTATION == 180)
+  #elif (LCD_ORIENTATION == 270)
+  #endif
 }
 
 void ili9325_DrawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
@@ -325,118 +370,39 @@ void ili9325_DrawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
   index |= (*(volatile uint16_t *) (pbmp + 12)) << 16;
   size = (size - index)/2;
   pbmp += index;
-  // Set GRAM write direction and BGR = 1
-  // I/D=00 (Horizontal : decrement, Vertical : decrement)
-  // AM=1 (address is updated in vertical writing direction)
-  //ili9325_WriteReg(LCD_REG_3, 0x1008);
-
+  
+  #if (LCD_ORIENTATION == 0)
+  #elif (LCD_ORIENTATION == 90)
+    ili9325_WriteReg(LCD_REG_3,  0x1008);  // Set GRAM write direction and BGR = 1
+                                           // I/D=00 (Horizontal : decrement, Vertical : decrement)
+                                           // AM=1 (address is updated in vertical writing direction)
+  #elif (LCD_ORIENTATION == 180)
+  #elif (LCD_ORIENTATION == 270)
+  #endif
+  
   // Set Cursor
-  //ili9325_SetCursor(Xpos, Ypos);  
+  ili9325_SetCursor(Xpos, Ypos);  
   
   // Prepare to write GRAM
   LCD_IO_WriteReg(LCD_REG_34);
-  LCD_IO_WriteDataBuffer((uint16_t*)pbmp, size / 2);
- 
-  // Set GRAM write direction and BGR = 1 */
-  // I/D = 01 (Horizontal : increment, Vertical : decrement) */
-  // AM = 1 (address is updated in vertical writing direction) */
-  //ili9325_WriteReg(LCD_REG_3, 0x1018);
+  LCD_IO_WriteDataBuffer((uint16_t*)pbmp, size);
+
+  #if (LCD_ORIENTATION == 0)
+  #elif (LCD_ORIENTATION == 90)
+    ili9325_WriteReg(LCD_REG_3,  0x1018); // set GRAM write direction and BGR = 1
+                                          // I/D=00 (Horizontal : increment, Vertical : decrement)
+                                          // AM=1 (address is updated in vertical writing direction)
+  #elif (LCD_ORIENTATION == 180)
+  #elif (LCD_ORIENTATION == 270)
+  #endif
 }
 
 void ili9325_DrawRGBImage(uint8_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height, uint8_t *Bitmap)
 {
-  uint32_t Size = Height * Width;
+  uint32_t size = Height * Width;
 
-  ili9325_SetDisplayWindow(Xpos, Ypos, Width - 1, Height - 1);
-
+  ili9325_SetCursor(Xpos, Ypos);
+  
   LCD_IO_WriteReg(LCD_REG_34);
-  LCD_IO_WriteDataBuffer((uint16_t *)Bitmap, Size);
-
-  ili9325_SetDisplayWindow(0, 0, ili9325_GetLcdPixelWidth() - 1, ili9325_GetLcdPixelHeight() - 1);
+  LCD_IO_WriteDataBuffer((uint16_t *)Bitmap, size);
 }
-
-/*
-void LCD_DrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
-{
-	uint16_t t; 
-	int xerr=0,yerr=0,delta_x,delta_y,distance; 
-	int incx,incy,uRow,uCol; 
-
-	delta_x=x2-x1; 				//计算坐标增量 
-	delta_y=y2-y1; 
-	uRow=x1; 
-	uCol=y1; 
-	if(delta_x>0)incx=1; 		//设置单步方向 
-	else if(delta_x==0)incx=0;	//垂直线 
-	else {incx=-1;delta_x=-delta_x;} 
-	if(delta_y>0)incy=1; 
-	else if(delta_y==0)incy=0;	//水平线 
-	else{incy=-1;delta_y=-delta_y;} 
-	if( delta_x>delta_y)distance=delta_x; //选取基本增量坐标轴 
-	else distance=delta_y; 
-	for(t=0;t<=distance+1;t++ )	//画线输出 
-	{  
-		LCD_DrawPoint(uRow,uCol);//画点 
-		xerr+=delta_x ; 
-		yerr+=delta_y ; 
-		if(xerr>distance) 
-		{ 
-			xerr-=distance; 
-			uRow+=incx; 
-		} 
-		if(yerr>distance) 
-		{ 
-			yerr-=distance; 
-			uCol+=incy; 
-		} 
-	}  
-}
-
-void Draw_Circle(uint8_t x0,uint16_t y0,uint8_t r)
-{
-	int a,b;
-	int di;
-	a=0;b=r;	  
-	di=3-(r<<1);             //判断下个点位置的标志
-	while(a<=b)
-	{
-		LCD_DrawPoint(x0-b,y0-a);             //3           
-		LCD_DrawPoint(x0+b,y0-a);             //0           
-		LCD_DrawPoint(x0-a,y0+b);             //1       
-		LCD_DrawPoint(x0-b,y0-a);             //7           
-		LCD_DrawPoint(x0-a,y0-b);             //2             
-		LCD_DrawPoint(x0+b,y0+a);             //4               
-		LCD_DrawPoint(x0+a,y0-b);             //5
-		LCD_DrawPoint(x0+a,y0+b);             //6 
-		LCD_DrawPoint(x0-b,y0+a);             
-		a++;
-		//使用Bresenham算法画圆     
-		if(di<0)di +=4*a+6;	  
-		else
-		{
-			di+=10+4*(a-b);   
-			b--;
-		} 
-		LCD_DrawPoint(x0+a,y0+b);
-	}
-} 
-
-void LCD_Fill(uint8_t xsta,uint16_t ysta,uint8_t xend,uint16_t yend,uint16_t color)
-{                    
-    uint32_t n;
-	//设置窗口										
-	ili9325_WriteReg(R80, xsta); //水平方向GRAM起始地址
-	ili9325_WriteReg(R81, xend); //水平方向GRAM结束地址
-	ili9325_WriteReg(R82, ysta); //垂直方向GRAM起始地址
-	ili9325_WriteReg(R83, yend); //垂直方向GRAM结束地址	
-	LCD_SetCursor(xsta,ysta);//设置光标位置  
-	LCD_WriteRAM_Prepare();  //开始写入GRAM	 	   	   
-	n=(uint32_t)(yend-ysta+1)*(xend-xsta+1);    
-	while(n--){Write_Dat(color);}//显示所填充的颜色. 
-	//恢复设置
-	ili9325_WriteReg(R80, 0x0000); //水平方向GRAM起始地址
-	ili9325_WriteReg(R81, 0x00EF); //水平方向GRAM结束地址
-	ili9325_WriteReg(R82, 0x0000); //垂直方向GRAM起始地址
-	ili9325_WriteReg(R83, 0x013F); //垂直方向GRAM结束地址	    
-}
-*/

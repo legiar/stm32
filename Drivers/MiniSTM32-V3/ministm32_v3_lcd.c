@@ -9,8 +9,14 @@
 LCD_DrawPropTypeDef DrawProp;
 
 #define ABS(X)  ((X) > 0 ? (X) : -(X)) 
+#define MAX_HEIGHT_FONT         17
+#define MAX_WIDTH_FONT          24
+#define OFFSET_BITMAP           54
+
+static uint8_t bitmap[MAX_HEIGHT_FONT*MAX_WIDTH_FONT*2+OFFSET_BITMAP] = {0};
 
 static void LCD_DrawPixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode);
+static void LCD_DrawChar(uint16_t Xpos, uint16_t Ypos, const uint8_t *pChar);
 
 uint8_t LCD_Init(void)
 {
@@ -83,6 +89,79 @@ void LCD_Clear(uint16_t Color)
   DrawProp.TextColor = color_backup; 
   LCD_SetTextColor(DrawProp.TextColor);
 }
+
+void LCD_ClearStringLine(uint16_t Line)
+{ 
+  uint32_t colorbackup = DrawProp.TextColor; 
+  DrawProp.TextColor = DrawProp.BackColor;;
+    
+  // Draw a rectangle with background color
+  LCD_FillRect(0, (Line * DrawProp.pFont->Height), LCD_GetXSize(), DrawProp.pFont->Height);
+  
+  DrawProp.TextColor = colorbackup;
+  LCD_SetTextColor(DrawProp.TextColor);
+}
+
+void LCD_DisplayChar(uint16_t Xpos, uint16_t Ypos, uint8_t Char)
+{
+  LCD_DrawChar(Xpos, Ypos, &DrawProp.pFont->table[(Char - ' ') *\
+    DrawProp.pFont->Height * ((DrawProp.pFont->Width + 7) / 8)]);
+}
+
+void LCD_DisplayStringAt(uint16_t Xpos, uint16_t Ypos, uint8_t *pText, Line_ModeTypdef Mode)
+{
+  uint16_t refcolumn = 1, counter = 0;
+  uint32_t size = 0, xsize = 0; 
+  uint8_t  *ptr = pText;
+  
+  // Get the text size
+  while (*ptr++) size ++;
+  
+  // Characters number per line
+  xsize = (LCD_GetXSize() / DrawProp.pFont->Width);
+  
+  switch (Mode)
+  {
+  case CENTER_MODE:
+    {
+      refcolumn = Xpos + ((xsize - size)* DrawProp.pFont->Width) / 2;
+      break;
+    }
+  case LEFT_MODE:
+    {
+      refcolumn = Xpos;
+      break;
+    }
+  case RIGHT_MODE:
+    {
+      refcolumn =  - Xpos + ((xsize - size)*DrawProp.pFont->Width);
+      break;
+    }    
+  default:
+    {
+      refcolumn = Xpos;
+      break;
+    }
+  }
+  
+  // Send the string character by character on lCD
+  while ((*pText != 0) & (((LCD_GetXSize() - (counter*DrawProp.pFont->Width)) & 0xFFFF) >= DrawProp.pFont->Width))
+  {
+    // Display one character on LCD
+    LCD_DisplayChar(refcolumn, Ypos, *pText);
+    // Decrement the column position by 16
+    refcolumn += DrawProp.pFont->Width;
+    // Point on the next character
+    pText++;
+    counter++;
+  }
+}
+
+void LCD_DisplayStringAtLine(uint16_t Line, uint8_t *pText)
+{
+  LCD_DisplayStringAt(0, LINE(Line),pText, LEFT_MODE);
+}
+
 
 void LCD_DrawHLine(uint16_t Xpos, uint16_t Ypos, uint16_t Length)
 {
@@ -161,6 +240,185 @@ void LCD_DrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
   }
 }
 
+void LCD_DrawRect(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height)
+{
+  // Draw horizontal lines
+  LCD_DrawHLine(Xpos, Ypos, Width);
+  LCD_DrawHLine(Xpos, (Ypos+ Height), Width);
+  
+  // Draw vertical lines
+  LCD_DrawVLine(Xpos, Ypos, Height);
+  LCD_DrawVLine((Xpos + Width), Ypos, Height);
+}
+
+void LCD_DrawCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius)
+{
+  int32_t  D;       /* Decision Variable */ 
+  uint32_t  CurX;   /* Current X Value */
+  uint32_t  CurY;   /* Current Y Value */ 
+  
+  D = 3 - (Radius << 1);
+  CurX = 0;
+  CurY = Radius;
+  
+  while (CurX <= CurY)
+  {
+    LCD_DrawPixel((Xpos + CurX), (Ypos - CurY), DrawProp.TextColor);
+
+    LCD_DrawPixel((Xpos - CurX), (Ypos - CurY), DrawProp.TextColor);
+
+    LCD_DrawPixel((Xpos + CurY), (Ypos - CurX), DrawProp.TextColor);
+
+    LCD_DrawPixel((Xpos - CurY), (Ypos - CurX), DrawProp.TextColor);
+
+    LCD_DrawPixel((Xpos + CurX), (Ypos + CurY), DrawProp.TextColor);
+
+    LCD_DrawPixel((Xpos - CurX), (Ypos + CurY), DrawProp.TextColor);
+
+    LCD_DrawPixel((Xpos + CurY), (Ypos + CurX), DrawProp.TextColor);
+
+    LCD_DrawPixel((Xpos - CurY), (Ypos + CurX), DrawProp.TextColor);   
+
+    /* Initialize the font */
+    LCD_SetFont(&LCD_DEFAULT_FONT);
+
+    if (D < 0)
+    { 
+      D += (CurX << 2) + 6;
+    }
+    else
+    {
+      D += ((CurX - CurY) << 2) + 10;
+      CurY--;
+    }
+    CurX++;
+  } 
+}
+
+void LCD_DrawPolygon(pPoint Points, uint16_t PointCount)
+{
+  int16_t X = 0, Y = 0;
+
+  if(PointCount < 2)
+  {
+    return;
+  }
+
+  LCD_DrawLine(Points->X, Points->Y, (Points+PointCount-1)->X, (Points+PointCount-1)->Y);
+  
+  while(--PointCount)
+  {
+    X = Points->X;
+    Y = Points->Y;
+    Points++;
+    LCD_DrawLine(X, Y, Points->X, Points->Y);
+  }
+}
+
+void LCD_DrawEllipse(int Xpos, int Ypos, int XRadius, int YRadius)
+{
+  int x = 0, y = -YRadius, err = 2-2*XRadius, e2;
+  float K = 0, rad1 = 0, rad2 = 0;
+  
+  rad1 = XRadius;
+  rad2 = YRadius;
+  
+  K = (float)(rad2/rad1);
+  
+  do {      
+    LCD_DrawPixel((Xpos-(uint16_t)(x/K)), (Ypos+y), DrawProp.TextColor);
+    LCD_DrawPixel((Xpos+(uint16_t)(x/K)), (Ypos+y), DrawProp.TextColor);
+    LCD_DrawPixel((Xpos+(uint16_t)(x/K)), (Ypos-y), DrawProp.TextColor);
+    LCD_DrawPixel((Xpos-(uint16_t)(x/K)), (Ypos-y), DrawProp.TextColor);      
+    
+    e2 = err;
+    if (e2 <= x) {
+      err += ++x*2+1;
+      if (-y == x && e2 <= y) e2 = 0;
+    }
+    if (e2 > y) err += ++y*2+1;     
+  }
+  while (y <= 0);
+}
+
+void LCD_FillRect(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height)
+{
+  LCD_SetTextColor(DrawProp.TextColor);
+  do
+  {
+    LCD_DrawHLine(Xpos, Ypos++, Width);    
+  }
+  while(Height--);
+}
+
+void LCD_FillCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius)
+{
+  int32_t  D;        /* Decision Variable */ 
+  uint32_t  CurX;    /* Current X Value */
+  uint32_t  CurY;    /* Current Y Value */ 
+  
+  D = 3 - (Radius << 1);
+
+  CurX = 0;
+  CurY = Radius;
+  
+  LCD_SetTextColor(DrawProp.TextColor);
+
+  while (CurX <= CurY)
+  {
+    if(CurY > 0) 
+    {
+      LCD_DrawHLine(Xpos - CurY, Ypos + CurX, 2*CurY);
+      LCD_DrawHLine(Xpos - CurY, Ypos - CurX, 2*CurY);
+    }
+
+    if(CurX > 0) 
+    {
+      LCD_DrawHLine(Xpos - CurX, Ypos - CurY, 2*CurX);
+      LCD_DrawHLine(Xpos - CurX, Ypos + CurY, 2*CurX);
+    }
+    if (D < 0)
+    { 
+      D += (CurX << 2) + 6;
+    }
+    else
+    {
+      D += ((CurX - CurY) << 2) + 10;
+      CurY--;
+    }
+    CurX++;
+  }
+
+  LCD_SetTextColor(DrawProp.TextColor);
+  LCD_DrawCircle(Xpos, Ypos, Radius);
+}
+
+void LCD_FillEllipse(int Xpos, int Ypos, int XRadius, int YRadius)
+{
+  int x = 0, y = -YRadius, err = 2-2*XRadius, e2;
+  float K = 0, rad1 = 0, rad2 = 0;
+  
+  rad1 = XRadius;
+  rad2 = YRadius;
+  
+  K = (float)(rad2/rad1);    
+  
+  do 
+  { 
+    LCD_DrawHLine((Xpos-(uint16_t)(x/K)), (Ypos+y), (2*(uint16_t)(x/K) + 1));
+    LCD_DrawHLine((Xpos-(uint16_t)(x/K)), (Ypos-y), (2*(uint16_t)(x/K) + 1));
+    
+    e2 = err;
+    if (e2 <= x) 
+    {
+      err += ++x*2+1;
+      if (-y == x && e2 <= y) e2 = 0;
+    }
+    if (e2 > y) err += ++y*2+1;
+  }
+  while (y <= 0);
+}
+
 void LCD_DrawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
 {
   uint32_t height = 0;
@@ -181,12 +439,74 @@ void LCD_DrawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp)
 
 void LCD_DrawRGBImage(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height, uint8_t *Bitmap)
 {
-  //LCD_SetDisplayWindow(Xpos, Ypos, Xsize, Ysize);
+  ili9325_SetDisplayWindow(Xpos, Ypos, Width, Height);
   ili9325_DrawRGBImage(Xpos, Ypos, Width, Height, Bitmap);
-  //LCD_SetDisplayWindow(0, 0, BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+  ili9325_SetDisplayWindow(0, 0, LCD_GetXSize(), LCD_GetYSize());
 }
 
 static void LCD_DrawPixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode)
 {
   ili9325_WritePixel(Xpos, Ypos, RGBCode);
+}
+
+static void LCD_DrawChar(uint16_t Xpos, uint16_t Ypos, const uint8_t *pChar)
+{
+  uint32_t counterh = 0, counterw = 0, index = 0;
+  uint16_t height = 0, width = 0;
+  uint8_t offset = 0;
+  uint8_t *pchar = NULL;
+  uint32_t line = 0;
+  
+  height = DrawProp.pFont->Height;
+  width  = DrawProp.pFont->Width;
+  
+  // Fill bitmap header
+  *(uint16_t *) (bitmap + 2) = (uint16_t)(height*width*2+OFFSET_BITMAP);
+  *(uint16_t *) (bitmap + 4) = (uint16_t)((height*width*2+OFFSET_BITMAP)>>16);
+  *(uint16_t *) (bitmap + 10) = OFFSET_BITMAP;
+  *(uint16_t *) (bitmap + 18) = (uint16_t)(width);
+  *(uint16_t *) (bitmap + 20) = (uint16_t)((width)>>16);
+  *(uint16_t *) (bitmap + 22) = (uint16_t)(height);
+  *(uint16_t *) (bitmap + 24) = (uint16_t)((height)>>16);
+
+  offset =  8 *((width + 7)/8) -  width ;
+  
+  for(counterh = 0; counterh < height; counterh++)
+  {
+    pchar = ((uint8_t *)pChar + (width + 7)/8 * counterh);
+    
+    if(((width + 7)/8) == 3)
+    {
+      line =  (pchar[0]<< 16) | (pchar[1]<< 8) | pchar[2];
+    }
+
+    if(((width + 7)/8) == 2)
+    {
+      line =  (pchar[0]<< 8) | pchar[1];
+    }
+      
+    if(((width + 7)/8) == 1)
+    {
+      line =  pchar[0];
+    }  
+    
+    for (counterw = 0; counterw < width; counterw++)
+    {
+      // Image in the bitmap is written from the bottom to the top
+      // Need to invert image in the bitmap
+      index = (((height-counterh-1)*width)+(counterw))*2+OFFSET_BITMAP;
+      if(line & (1 << (width- counterw + offset- 1))) 
+      {
+        bitmap[index] = (uint8_t)DrawProp.TextColor;
+        bitmap[index+1] = (uint8_t)(DrawProp.TextColor >> 8);
+      }
+      else
+      {
+        bitmap[index] = (uint8_t)DrawProp.BackColor;
+        bitmap[index+1] = (uint8_t)(DrawProp.BackColor >> 8);
+      } 
+    }
+  }
+
+  LCD_DrawBitmap(Xpos, Ypos, bitmap);
 }

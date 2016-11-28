@@ -36,8 +36,8 @@
   /* Includes ------------------------------------------------------------------*/
 
 /* USER CODE BEGIN Includes */
+#include "stdio.h"
 #include "stm32f1xx_hal.h"
-
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
@@ -97,7 +97,6 @@
 #define LCD_DB09_Pin GPIO_PIN_9
 #define LCD_DB09_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
 /* USER CODE END Private defines */
 
 /**

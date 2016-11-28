@@ -42,16 +42,34 @@
 #include "ministm32_v3.h"
 #include "ministm32_v3_lcd.h"
 #include "logo.h"
-
 #include "hardware.h"
-#include "ili932x.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-extern uint8_t gImage_11[];
+uint8_t DemoIndex = 0;
+__IO uint8_t NbLoop = 1;
+
+typedef struct
+{
+  void   (*DemoFunc)(void);
+  uint8_t DemoName[50]; 
+  uint32_t DemoIndex;
+} DemoTypeDef;
+
+#define COUNT_OF_EXAMPLE(x)    (sizeof(x)/sizeof(DemoTypeDef))
+
+void LCD_Demo(void);
+void Log_Demo(void);
+
+DemoTypeDef  Examples[]=
+{
+  {LCD_Demo, "LCD", 0}, 
+  //{SD_demo, "SD", 0},  
+  {Log_Demo, "LCD LOG", 0}
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,6 +82,49 @@ void Error_Handler(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+uint8_t CheckForUserInput(void)
+{
+  if(HAL_GPIO_ReadPin(KEY1_GPIO_PORT, KEY1_PIN) == GPIO_PIN_RESET)
+  {
+    while (HAL_GPIO_ReadPin(KEY1_GPIO_PORT, KEY1_PIN) == GPIO_PIN_RESET);
+    return 1 ;
+  }
+  return 0;
+}
+
+static void Display_DemoDescription(void)
+{
+  char desc[50];
+
+  LCD_SetFont(&LCD_DEFAULT_FONT);
+  
+  /* Clear the LCD */ 
+  LCD_SetBackColor(LCD_COLOR_WHITE); 
+  LCD_Clear(LCD_COLOR_WHITE);
+
+  /* Set the LCD Text Color */
+  LCD_SetTextColor(LCD_COLOR_DARKBLUE);  
+
+  /* Display LCD messages */
+  LCD_DisplayStringAt(0, 10, (uint8_t *)"STM32F103xG BSP", CENTER_MODE);
+  LCD_DisplayStringAt(0, 35, (uint8_t *)"Drivers examples", CENTER_MODE);
+  
+  /* Draw Bitmap */
+  LCD_DrawBitmap((LCD_GetXSize() - 80)/2, 65, (uint8_t *)stlogo);
+  
+  LCD_SetFont(&Font12);
+  LCD_DisplayStringAt(0, LCD_GetYSize()- 20, (uint8_t *)"Copyright (c) STMicroelectronics 2014", CENTER_MODE);
+  
+  LCD_SetFont(&Font16);
+  LCD_SetTextColor(LCD_COLOR_BLUE);
+  LCD_FillRect(0, LCD_GetYSize()/2 + 15, LCD_GetXSize(), 60);
+  LCD_SetTextColor(LCD_COLOR_WHITE);
+  LCD_SetBackColor(LCD_COLOR_BLUE); 
+  LCD_DisplayStringAt(0, LCD_GetYSize() / 2 + 15, (uint8_t *)"Press Key push-button", CENTER_MODE);
+  LCD_DisplayStringAt(0, LCD_GetYSize()/2 + 30, (uint8_t *)"to start :", CENTER_MODE);
+  sprintf(desc,"%s example", Examples[DemoIndex].DemoName);
+  LCD_DisplayStringAt(0, LCD_GetYSize()/2 + 45, (uint8_t *)desc, CENTER_MODE);   
+}
 /* USER CODE END 0 */
 
 int main(void)
@@ -87,18 +148,25 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   LCD_Init();
+  Display_DemoDescription();
   
-  LCD_Clear(LCD_COLOR_BLUE);
-  LCD_DrawRGBImage((LCD_GetXSize() - 99) / 2, 100, 99, 97, (uint8_t*)logoOpenMCU);
+  /*LCD_Clear(LCD_COLOR_BLUE);
+  LCD_SetBackColor(LCD_COLOR_BLUE);
+  //LCD_DrawRGBImage((LCD_GetXSize() - 99) / 2, 100, 99, 97, (uint8_t*)logoOpenMCU);
+  LCD_DrawBitmap((LCD_GetXSize() - 80)/2, 65, (uint8_t *)stlogo);
   
   LCD_SetTextColor(LCD_COLOR_RED);
-  LCD_DrawHLine(20, 20, 200);
-  LCD_DrawLine(220, 20, 210, 15);
-  LCD_DrawLine(220, 20, 210, 25);
+  LCD_DrawHLine(20, 20, LCD_GetXSize() - 40);
+  LCD_DrawLine(LCD_GetXSize() - 20, 20, LCD_GetXSize() - 30, 15);
+  LCD_DrawLine(LCD_GetXSize() - 20, 20, LCD_GetXSize() - 30, 25);
+
+  LCD_DisplayChar(50, 50, 'R');
+
   LCD_SetTextColor(LCD_COLOR_YELLOW);
-  LCD_DrawVLine(20, 20, 280);
-  LCD_DrawLine(20, 300, 15, 290);
-  LCD_DrawLine(20, 300, 25, 290);
+  LCD_DrawVLine(20, 20, LCD_GetYSize() - 40);
+  LCD_DrawLine(20, LCD_GetYSize() - 20, 15, LCD_GetYSize() - 30);
+  LCD_DrawLine(20, LCD_GetYSize() - 20, 25, LCD_GetYSize() - 30);*/
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -110,6 +178,20 @@ int main(void)
   /* USER CODE BEGIN 3 */
     HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
     HAL_Delay(500);
+    
+    if(HAL_GPIO_ReadPin(KEY1_GPIO_PORT, KEY1_PIN) == GPIO_PIN_RESET)
+    {
+      while (HAL_GPIO_ReadPin(KEY1_GPIO_PORT, KEY1_PIN) == GPIO_PIN_RESET);
+      
+      Examples[DemoIndex++].DemoFunc();
+      
+      if (DemoIndex >= COUNT_OF_EXAMPLE(Examples))
+      {
+        NbLoop++;
+        DemoIndex = 0;
+      }
+      Display_DemoDescription();
+    }
   }
   /* USER CODE END 3 */
 }

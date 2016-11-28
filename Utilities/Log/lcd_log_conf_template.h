@@ -1,10 +1,16 @@
 /**
   ******************************************************************************
-  * @file    fonts.h
+  * @file    lcd_log_conf_template.h
   * @author  MCD Application Team
   * @version V1.0.0
   * @date    18-February-2014
-  * @brief   Header for fonts.c file
+  * @brief   lcd_log configuration template file.
+  *          This file should be copied to the application folder and modified 
+  *          as follows:
+  *            - Rename it to 'lcd_log_conf.h'.
+  *            - Update the name of the LCD driver's header file, depending on
+  *               the EVAL board you are using, see line40 below (be default this  
+  *               file will generate compile error unless you do this modification).
   ******************************************************************************
   * @attention
   *
@@ -36,84 +42,98 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __FONTS_H
-#define __FONTS_H
 
-#ifdef __cplusplus
- extern "C" {
-#endif
+#ifndef  __LCD_LOG_CONF_H__
+#define  __LCD_LOG_CONF_H__
+
 
 /* Includes ------------------------------------------------------------------*/
-#include <stdint.h>
+#include "stm32xxx_eval_lcd.h" /* replace 'stm32xxx' with your EVAL board name, ex: stm324x9i_eval_lcd.h */
+#include <stdio.h>
 
-/** @addtogroup Utilities
+
+/** @addtogroup LCD_LOG
   * @{
   */
   
-/** @addtogroup STM32_EVAL
+/** @defgroup LCD_LOG
+  * @brief This file is the 
   * @{
   */ 
 
-/** @addtogroup Common
-  * @{
-  */
 
-/** @addtogroup FONTS
+/** @defgroup LCD_LOG_CONF_Exported_Defines
   * @{
   */ 
 
-/** @defgroup FONTS_Exported_Types
-  * @{
-  */ 
-typedef struct _tFont
-{    
-  const uint8_t *table;
-  uint16_t Width;
-  uint16_t Height;
-  
-} sFONT;
+/* Comment the line below to disable the scroll back and forward features */
+#define     LCD_SCROLL_ENABLED      1 
 
-extern sFONT Font24;
-extern sFONT Font20;
-extern sFONT Font16;
-extern sFONT Font12;
-extern sFONT Font8;
-/**
-  * @}
-  */ 
+/* Define the Fonts  */
+#define     LCD_LOG_HEADER_FONT                   Font16
+#define     LCD_LOG_FOOTER_FONT                   Font12
+#define     LCD_LOG_TEXT_FONT                     Font12
+            
+/* Define the LCD LOG Color  */
+#define     LCD_LOG_BACKGROUND_COLOR              LCD_COLOR_WHITE
+#define     LCD_LOG_TEXT_COLOR                    LCD_COLOR_DARKBLUE
 
-/** @defgroup FONTS_Exported_Constants
-  * @{
-  */ 
-#define LINE(x) ((x) * (((sFONT *)LCD_GetFont())->Height))
+#define     LCD_LOG_SOLID_BACKGROUND_COLOR        LCD_COLOR_BLUE
+#define     LCD_LOG_SOLID_TEXT_COLOR              LCD_COLOR_WHITE
 
-/**
-  * @}
-  */ 
+/* Define the cache depth */
+#define     CACHE_SIZE              100
+#define     YWINDOW_SIZE            17
 
-/** @defgroup FONTS_Exported_Macros
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-/** @defgroup FONTS_Exported_Functions
-  * @{
-  */ 
-/**
-  * @}
-  */
-
-#ifdef __cplusplus
-}
+#if (YWINDOW_SIZE > 17)
+  #error "Wrong YWINDOW SIZE"
 #endif
-  
-#endif /* __FONTS_H */
- 
+
+/* Redirect the printf to the LCD */
+#ifdef __GNUC__
+/* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
+   set to 'Yes') calls __io_putchar() */
+#define LCD_LOG_PUTCHAR int __io_putchar(int ch)
+#else
+#define LCD_LOG_PUTCHAR int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+
+/** @defgroup LCD_LOG_CONF_Exported_TypesDefinitions
+  * @{
+  */ 
+
 /**
   * @}
-  */
+  */ 
+
+
+/** @defgroup LCD_LOG_Exported_Macros
+  * @{
+  */ 
+
+
+/**
+  * @}
+  */ 
+
+/** @defgroup LCD_LOG_CONF_Exported_Variables
+  * @{
+  */ 
+
+/**
+  * @}
+  */ 
+
+/** @defgroup LCD_LOG_CONF_Exported_FunctionsPrototype
+  * @{
+  */ 
+
+/**
+  * @}
+  */ 
+
+
+#endif //__LCD_LOG_CONF_H__
 
 /**
   * @}
@@ -121,14 +141,6 @@ extern sFONT Font8;
 
 /**
   * @}
-  */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */      
+  */ 
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

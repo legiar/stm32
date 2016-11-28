@@ -450,6 +450,11 @@
               <FileType>1</FileType>
               <FilePath>../Src/stm32f1xx_it.c</FilePath>
             </File>
+            <File>
+              <FileName>lcd_demo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\lcd_demo.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -555,16 +560,6 @@
         <Group>
           <GroupName>Drivers/MiniSTM32-V3</GroupName>
           <Files>
-            <File>
-              <FileName>bmp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\Drivers\MiniSTM32-V3\bmp.c</FilePath>
-            </File>
-            <File>
-              <FileName>hz16.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\Drivers\MiniSTM32-V3\hz16.c</FilePath>
-            </File>
             <File>
               <FileName>ministm32_v3.c</FileName>
               <FileType>1</FileType>

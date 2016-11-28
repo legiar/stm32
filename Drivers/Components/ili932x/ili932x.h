@@ -3,8 +3,16 @@
 
 #include <stdint.h>
 
+#define  LCD_WIDTH              320
+#define  LCD_HEIGHT             240
+
+//#define LCD_ORIENTATION         0
+#define LCD_ORIENTATION         90
+//#define LCD_ORIENTATION         180
+//#define LCD_ORIENTATION         270
+
 // ILI9325 ID  
-#define  ILI9325_ID    				0x9325
+#define  ILI9325_ID             0x9325
    
 // ILI9325 Size  
 #define  ILI9325_LCD_PIXEL_WIDTH    ((uint16_t)320)

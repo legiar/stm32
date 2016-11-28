@@ -3,6 +3,14 @@
 
 #include "stm32f1xx_hal.h"
 
+typedef enum 
+{  
+  BUTTON_MODE_GPIO = 0,
+  BUTTON_MODE_EXTI = 1,
+  BUTTON_MODE_EVT  = 2
+} ButtonMode_TypeDef;
+
+
 #define USE_BITBANG
 
 // BitBang
